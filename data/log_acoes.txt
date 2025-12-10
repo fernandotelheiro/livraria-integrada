@@ -55,3 +55,8 @@
 2025-12-10T00:55:05.232904600 - CRIACAO|id=4|livro=Com Espaços|autor=Autor C|qtd=1|preco=5,00
 2025-12-10T00:55:05.423238200 - CRIACAO_CLIENTE|id=3|nome=Novo Cliente|email=novo@email
 2025-12-10T00:55:05.432366800 - COMPRA|cliente=Fulano da Silva|livro=1984|qtd=1|antes=2|depois=1
+2025-12-10T01:21:46.302968500 - CRIACAO_CLIENTE|id=3|nome=Novo Cliente|email=novo@email
+2025-12-10T01:21:46.329941 - COMPRA|cliente=Fulano da Silva|livro=1984|qtd=1|antes=2|depois=1
+2025-12-10T01:21:58.680204 - CRIACAO|id=4|livro=Livro Teste 1|autor=Autor A|qtd=3|preco=19,00
+2025-12-10T01:21:59.048880700 - CRIACAO|id=4|livro=Livro Teste 2|autor=Autor B|qtd=0|preco=0,00
+2025-12-10T01:21:59.377033800 - CRIACAO|id=4|livro=Com Espaços|autor=Autor C|qtd=1|preco=5,00

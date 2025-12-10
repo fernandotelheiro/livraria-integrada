@@ -130,3 +130,4 @@ public class MainIntegrado {
         log.info("Servidor integrado (TP4) rodando em http://localhost:7000/");
     }
 }
+// teste para deploy
