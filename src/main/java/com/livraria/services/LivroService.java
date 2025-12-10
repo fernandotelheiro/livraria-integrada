@@ -5,9 +5,11 @@ import com.livraria.repositories.CsvLivroRepository;
 import com.livraria.utils.LoggerUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class LivroService {
+
     private final CsvLivroRepository repo;
     private final LoggerUtils logger;
 
@@ -16,12 +18,14 @@ public class LivroService {
         this.logger = new LoggerUtils();
     }
 
-    public java.util.List<Livro> listar() { return repo.listar(); }
+    public List<Livro> listar() {
+        return repo.listar();
+    }
 
     /**
-     Título e Autor obrigatórios.
-     Se (titulo+autor) já existir, soma quantidade fazendo um merge dos valores;
-     Senão, cria novo registro.
+     * Título e Autor obrigatórios.
+     * Se (titulo+autor) já existir, soma quantidade fazendo um merge dos valores;
+     * Senão, cria novo registro.
      */
     public Livro criar(Livro novo) {
         var todos = repo.listar();
@@ -31,12 +35,10 @@ public class LivroService {
         int qtdNova   = Math.max(0, novo.getQuantidade());
         double preco  = novo.getPreco();
 
-        // validação obrigatória
         if (isBlank(titulo) || isBlank(autor)) {
             throw new IllegalArgumentException("Título e autor são obrigatórios");
         }
 
-        // procuran um MATCH na mesma lista que será persistida
         Livro existente = null;
         String tNorm = norm(titulo);
         String aNorm = norm(autor);
@@ -50,18 +52,27 @@ public class LivroService {
         if (existente != null) {
             int antes = existente.getQuantidade();
             int depois = antes + qtdNova;
-            existente.setQuantidade(depois);       // altera o mesmo objeto da lista
-            //  mantem o preço já cadastrado
-            repo.salvarTodos(todos);               // persiste a lista alterada
+
+            // cria nova instância com quantidade atualizada
+            Livro atualizado = existente.withQuantidade(depois);
+
+            List<Livro> novaLista = new ArrayList<>();
+            for (Livro l : todos) {
+                if (l.getId() == existente.getId()) {
+                    novaLista.add(atualizado);
+                } else {
+                    novaLista.add(l);
+                }
+            }
+            repo.salvarTodos(novaLista);
 
             logger.registrar(String.format(
                     "ATUALIZACAO|acao=MERGE|id=%d|livro=%s|autor=%s|antes=%d|adicionado=%d|depois=%d|preco=%.2f",
-                    existente.getId(), titulo, autor, antes, qtdNova, depois, existente.getPreco()
+                    atualizado.getId(), titulo, autor, antes, qtdNova, depois, atualizado.getPreco()
             ));
-            return existente;
+            return atualizado;
         }
 
-        // não existe -> cria novo id
         int nextId = todos.stream().mapToInt(Livro::getId).max().orElse(0) + 1;
         var livro = new Livro(nextId, titulo, autor, qtdNova, preco);
 
@@ -84,7 +95,6 @@ public class LivroService {
         String t = safeTrim(dados.getTitulo());
         String a = safeTrim(dados.getAutor());
 
-        // mantém coerência também no update
         if (isBlank(t) || isBlank(a)) {
             throw new IllegalArgumentException("Título e autor são obrigatórios");
         }
@@ -103,7 +113,9 @@ public class LivroService {
                 list.add(l);
             }
         }
-        if (atualizado == null) throw new RuntimeException("Livro não encontrado");
+        if (atualizado == null) {
+            throw new RuntimeException("Livro não encontrado");
+        }
 
         repo.salvarTodos(list);
         logger.registrar(String.format(
@@ -116,7 +128,9 @@ public class LivroService {
 
     public void excluir(int id) {
         var todos = repo.listar();
-        var alvo = repo.buscarPorId(id).orElseThrow(() -> new RuntimeException("Livro não encontrado"));
+        var alvo = repo.buscarPorId(id)
+                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
+
         if (alvo.getQuantidade() == 0) {
             logger.registrar(String.format(
                     "BLOQUEADA|acao=EXCLUSAO|id=%d|livro=%s|motivo=ESTOQUE_ZERO",
@@ -124,28 +138,44 @@ public class LivroService {
             ));
             return;
         }
+
         var list = new ArrayList<Livro>();
-        for (var l : todos) if (l.getId() != id) list.add(l);
+        for (var l : todos) {
+            if (l.getId() != id) {
+                list.add(l);
+            }
+        }
         repo.salvarTodos(list);
 
-        logger.registrar(String.format("EXCLUSAO|id=%d|livro=%s", id, alvo.getTitulo()));
+        logger.registrar(String.format(
+                "EXCLUSAO|id=%d|livro=%s",
+                id, alvo.getTitulo()
+        ));
     }
 
     public void comprar(String tituloLivro, String nomeCliente, int quantidade) {
         var livro = repo.buscarPorTitulo(tituloLivro)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
-        if (quantidade <= 0) throw new IllegalArgumentException("Quantidade inválida");
+
+        if (quantidade <= 0) {
+            throw new IllegalArgumentException("Quantidade inválida");
+        }
 
         int anterior = livro.getQuantidade();
         int novo = anterior - quantidade;
-        if (novo < 0) throw new RuntimeException("Estoque insuficiente");
 
-        // atualiza na mesma lista
+        if (novo < 0) {
+            throw new RuntimeException("Estoque insuficiente");
+        }
+
         var todos = repo.listar();
         var list = new ArrayList<Livro>();
         for (var l : todos) {
-            if (l.getId() == livro.getId()) l.setQuantidade(novo);
-            list.add(l);
+            if (l.getId() == livro.getId()) {
+                list.add(l.withQuantidade(novo));
+            } else {
+                list.add(l);
+            }
         }
         repo.salvarTodos(list);
 
@@ -159,11 +189,15 @@ public class LivroService {
     private static boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
     }
+
     private static String safeTrim(String s) {
         return s == null ? "" : s.trim();
     }
+
     private static String norm(String s) {
         if (s == null) return "";
-        return s.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
+        return s.trim()
+                .replaceAll("\\s+", " ")
+                .toLowerCase(Locale.ROOT);
     }
 }

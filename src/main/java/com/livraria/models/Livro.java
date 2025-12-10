@@ -1,11 +1,12 @@
 package com.livraria.models;
 
-public class Livro {
-    private int id;
-    private String titulo;
-    private String autor;
-    private int quantidade;
-    private double preco;
+public final class Livro {
+
+    private final int id;
+    private final String titulo;
+    private final String autor;
+    private final int quantidade;
+    private final double preco;
 
     public Livro(int id, String titulo, String autor, int quantidade, double preco) {
         this.id = id;
@@ -21,5 +22,23 @@ public class Livro {
     public int getQuantidade() { return quantidade; }
     public double getPreco() { return preco; }
 
-    public void setQuantidade(int quantidade) { this.quantidade = quantidade; }
+    public Livro withQuantidade(int novaQuantidade) {
+        return new Livro(
+                this.id,
+                this.titulo,
+                this.autor,
+                novaQuantidade,
+                this.preco
+        );
+    }
+
+    public Livro withPreco(double novoPreco) {
+        return new Livro(
+                this.id,
+                this.titulo,
+                this.autor,
+                this.quantidade,
+                novoPreco
+        );
+    }
 }

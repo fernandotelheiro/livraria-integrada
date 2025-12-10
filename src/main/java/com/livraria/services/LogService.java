@@ -1,6 +1,7 @@
 package com.livraria.services;
 
 import com.livraria.models.LogEntry;
+import com.livraria.models.LogEntry.Tipo;
 import com.livraria.shared.utils.Paths;
 
 import java.io.IOException;
@@ -51,7 +52,8 @@ public class LogService {
 
                 LocalDateTime timestamp;
                 try {
-                    timestamp = LocalDateTime.parse(ts); // ISO_LOCAL_DATE_TIME (aceita fração)
+                    // ISO_LOCAL_DATE_TIME (aceita fração de segundos)
+                    timestamp = LocalDateTime.parse(ts);
                 } catch (Exception e) {
                     return;
                 }
@@ -64,33 +66,37 @@ public class LogService {
                     Integer qtd = Integer.parseInt(m.group("qtd"));
                     Integer antes = Integer.parseInt(m.group("antes"));
                     Integer depois = Integer.parseInt(m.group("depois"));
-                    entries.add(new LogEntry(timestamp, "COMPRA", cliente, livro, qtd, antes, depois, msg));
+                    entries.add(new LogEntry(timestamp, Tipo.COMPRA, cliente, livro, qtd, antes, depois, msg));
                     return;
                 }
+
                 m = CRIACAO.matcher(msg);
                 if (m.find()) {
                     String livro = m.group("livro").trim();
                     Integer qtd = Integer.parseInt(m.group("qtd"));
-                    entries.add(new LogEntry(timestamp, "CRIACAO", null, livro, qtd, null, null, msg));
+                    entries.add(new LogEntry(timestamp, Tipo.CRIACAO, null, livro, qtd, null, null, msg));
                     return;
                 }
+
                 m = ATUALIZACAO.matcher(msg);
                 if (m.find()) {
                     Integer qtd = Integer.parseInt(m.group("qtd"));
-                    entries.add(new LogEntry(timestamp, "ATUALIZACAO", null, null, qtd, null, null, msg));
+                    entries.add(new LogEntry(timestamp, Tipo.ATUALIZACAO, null, null, qtd, null, null, msg));
                     return;
                 }
+
                 if (EXCLUSAO.matcher(msg).find()) {
-                    entries.add(new LogEntry(timestamp, "EXCLUSAO", null, null, null, null, null, msg));
+                    entries.add(new LogEntry(timestamp, Tipo.EXCLUSAO, null, null, null, null, null, msg));
                     return;
                 }
+
                 if (BLOQUEADA.matcher(msg).find()) {
-                    entries.add(new LogEntry(timestamp, "BLOQUEADA", null, null, null, null, null, msg));
+                    entries.add(new LogEntry(timestamp, Tipo.BLOQUEADA, null, null, null, null, null, msg));
                     return;
                 }
 
                 // fallback: sem parse específico, ainda devolve a linha crua
-                entries.add(new LogEntry(timestamp, "DESCONHECIDO", null, null, null, null, null, msg));
+                entries.add(new LogEntry(timestamp, Tipo.DESCONHECIDO, null, null, null, null, null, msg));
             });
         } catch (IOException e) {
             throw new RuntimeException("Erro ao ler log", e);
@@ -99,6 +105,11 @@ public class LogService {
     }
 
     // Helpers de filtro
-    public static LocalDateTime inicioDoDia(LocalDate d) { return d.atStartOfDay(); }
-    public static LocalDateTime fimDoDia(LocalDate d) { return d.atTime(23,59,59,999_000_000); }
+    public static LocalDateTime inicioDoDia(LocalDate d) {
+        return d.atStartOfDay();
+    }
+
+    public static LocalDateTime fimDoDia(LocalDate d) {
+        return d.atTime(23, 59, 59, 999_000_000);
+    }
 }
