@@ -36,50 +36,71 @@ jobs:
           name: livraria-dist
           path: build/libs/**/*.jar
 
-  deploy-dev:
+  deploy_dev:
     name: Deploy em ambiente DEV
     runs-on: ubuntu-latest
     needs: build
-    environment: dev
-
     env:
-      APP_ENV: dev
       BASE_URL: ${{ secrets.DEV_BASE_URL }}
+      APP_NAME: ${{ env.APP_NAME }}
 
     steps:
-      - name: Baixar artefato gerado no build
+      - name: Baixar artefatos (JAR)
         uses: actions/download-artifact@v4
         with:
           name: livraria-dist
-          path: dist
 
       - name: Simular deploy em DEV
         run: |
-          echo "Aplicação: $APP_NAME"
-          echo "Ambiente: $APP_ENV"
-          echo "Realizando deploy para URL: $BASE_URL"
+          echo "::notice::Iniciando deploy no ambiente DEV para a app $APP_NAME"
+          echo "Usando base URL: $BASE_URL"
+          # aqui iria o comando real de deploy para DEV
 
-  deploy-prod:
+      - name: Resumo do deploy DEV
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          echo "## Deploy - Ambiente DEV" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Status do job: **$JOB_STATUS**" >> $GITHUB_STEP_SUMMARY
+          echo "- Workflow: \`$GITHUB_WORKFLOW\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Release: \`$GITHUB_REF_NAME\`" >> $GITHUB_STEP_SUMMARY
+
+  deploy_prod:
     name: Deploy em ambiente PROD
     runs-on: ubuntu-latest
-    needs: deploy-dev
-    environment: prod   # ambiente protegido
-
+    needs: deploy_dev
+    # Se você quiser usar proteção de ambiente, crie um ambiente "production" no GitHub
+    # e descomente a linha abaixo:
+    # environment: production
     env:
-      APP_ENV: prod
       BASE_URL: ${{ secrets.PROD_BASE_URL }}
       DEPLOY_TOKEN: ${{ secrets.PROD_DEPLOY_TOKEN }}
+      APP_NAME: ${{ env.APP_NAME }}
 
     steps:
-      - name: Baixar artefato gerado no build
+      - name: Baixar artefatos (JAR)
         uses: actions/download-artifact@v4
         with:
           name: livraria-dist
-          path: dist
 
       - name: Simular deploy em PROD
         run: |
-          echo "Aplicação: $APP_NAME"
-          echo "Ambiente: $APP_ENV"
-          echo "Usando token de deploy (mascado): $DEPLOY_TOKEN"
-          echo "Realizando deploy para URL: $BASE_URL"
+          echo "::warning::Iniciando deploy no ambiente PROD para a app $APP_NAME"
+          echo "Usando base URL: $BASE_URL"
+          echo "Chamando endpoint de deploy com token mascarado"
+          # Exemplo de chamada (comentado para não falhar):
+          # curl -X POST "$BASE_URL/deploy" \
+          #   -H "Authorization: Bearer $DEPLOY_TOKEN" || true
+
+      - name: Resumo do deploy PROD
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          echo "## Deploy - Ambiente PROD" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Status do job: **$JOB_STATUS**" >> $GITHUB_STEP_SUMMARY
+          echo "- Workflow: \`$GITHUB_WORKFLOW\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Release: \`$GITHUB_REF_NAME\`" >> $GITHUB_STEP_SUMMARY
