@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>Sistema de Suporte - TP3</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            margin-bottom: 0.5rem;
+        }
+        form {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-top: 0.5rem;
+        }
+        input[type="text"],
+        input[type="email"],
+        select,
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0.35rem;
+            margin-top: 0.2rem;
+        }
+        textarea {
+            min-height: 80px;
+        }
+        button {
+            margin-top: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            cursor: pointer;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 0.8rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+        }
+        th {
+            background-color: #f3f3f3;
+        }
+        .acoes button {
+            margin-right: 0.3rem;
+        }
+        #msg {
+            margin-top: 0.5rem;
+            padding: 0.4rem;
+            display: none;
+        }
+        #msg.ok {
+            display: block;
+            background-color: #e6ffed;
+            color: #1a7f37;
+            border: 1px solid #1a7f37;
+        }
+        #msg.erro {
+            display: block;
+            background-color: #ffe6e6;
+            color: #b91c1c;
+            border: 1px solid #b91c1c;
+        }
+    </style>
+</head>
+<body>
+<h1>Sistema de Suporte - TP3</h1>
+
+<section>
+    <h2>Cadastro de Ticket</h2>
+    <!-- hidden: se tiver valor, é edição; se estiver vazio, é criação -->
+    <form id="form-ticket">
+        <input type="hidden" id="ticket-id" />
+
+        <label>
+            Título *
+            <input type="text" id="titulo" required />
+        </label>
+
+        <label>
+            Descrição *
+            <textarea id="descricao" required></textarea>
+        </label>
+
+        <label>
+            E-mail do cliente *
+            <input type="email" id="emailCliente" required />
+        </label>
+
+        <label>
+            Prioridade *
+            <select id="prioridade" required>
+                <option value="">-- selecione --</option>
+                <option value="BAIXA">Baixa</option>
+                <option value="MEDIA">Média</option>
+                <option value="ALTA">Alta</option>
+                <option value="CRITICA">Crítica</option>
+            </select>
+        </label>
+
+        <label>
+            Status *
+            <select id="status" required>
+                <option value="">-- selecione --</option>
+                <option value="ABERTO">Aberto</option>
+                <option value="EM_ANDAMENTO">Em andamento</option>
+                <option value="RESOLVIDO">Resolvido</option>
+                <option value="CANCELADO">Cancelado</option>
+            </select>
+        </label>
+
+        <button type="submit" id="btn-salvar">Salvar</button>
+        <button type="button" id="btn-cancelar">Cancelar edição</button>
+    </form>
+
+    <div id="msg"></div>
+</section>
+
+<section>
+    <h2>Tickets cadastrados</h2>
+    <table id="tbl-tickets">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Prioridade</th>
+            <th>Status</th>
+            <th>E-mail cliente</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- linhas preenchidas via JS -->
+        </tbody>
+    </table>
+</section>
+
+<script>
+    const API_BASE = "/api/tickets";
+
+    const form = document.getElementById("form-ticket");
+    const msgBox = document.getElementById("msg");
+
+    const idField = document.getElementById("ticket-id");
+    const tituloField = document.getElementById("titulo");
+    const descField = document.getElementById("descricao");
+    const emailField = document.getElementById("emailCliente");
+    const prioridadeField = document.getElementById("prioridade");
+    const statusField = document.getElementById("status");
+    const tbody = document.querySelector("#tbl-tickets tbody");
+    const btnCancelar = document.getElementById("btn-cancelar");
+
+    function showMessage(text, type) {
+        msgBox.textContent = text;
+        msgBox.className = "";
+        msgBox.style.display = "block";   // <<< garante que fique visível
+
+        if (type === "ok") {
+            msgBox.classList.add("ok");
+        } else if (type === "erro") {
+            msgBox.classList.add("erro");
+        }
+    }
+
+    function clearMessage() {
+        msgBox.textContent = "";
+        msgBox.className = "";
+        msgBox.style.display = "none";
+    }
+
+    function preencherFormulario(ticket) {
+        idField.value = ticket.id;
+        tituloField.value = ticket.titulo;
+        descField.value = ticket.descricao;
+        emailField.value = ticket.emailCliente;
+        prioridadeField.value = ticket.prioridade;
+        statusField.value = ticket.status;
+    }
+
+    function limparFormulario() {
+        idField.value = "";
+        tituloField.value = "";
+        descField.value = "";
+        emailField.value = "";
+        prioridadeField.value = "";
+        statusField.value = "";
+    }
+
+    async function carregarTickets() {
+        try {
+            clearMessage();
+            const res = await fetch(API_BASE);
+            if (!res.ok) {
+                const body = await res.json().catch(() => null);
+                const msg = body && body.erro ? body.erro : "Falha ao carregar tickets.";
+                showMessage(msg, "erro");
+                return;
+            }
+            const lista = await res.json();
+            renderTabela(lista);
+        } catch (e) {
+            showMessage("Erro de rede ao carregar tickets.", "erro");
+        }
+    }
+
+    function renderTabela(lista) {
+        tbody.innerHTML = "";
+        lista.forEach(ticket => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>${ticket.id}</td>
+                <td>${ticket.titulo}</td>
+                <td>${ticket.prioridade}</td>
+                <td>${ticket.status}</td>
+                <td>${ticket.emailCliente}</td>
+                <td class="acoes"></td>
+            `;
+
+            const acoesTd = tr.querySelector(".acoes");
+
+            const btnEditar = document.createElement("button");
+            btnEditar.textContent = "Editar";
+            btnEditar.addEventListener("click", () => editarTicket(ticket.id));
+
+            const btnExcluir = document.createElement("button");
+            btnExcluir.textContent = "Excluir";
+            btnExcluir.addEventListener("click", () => excluirTicket(ticket.id));
+
+            acoesTd.appendChild(btnEditar);
+            acoesTd.appendChild(btnExcluir);
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function editarTicket(id) {
+        try {
+            clearMessage();
+            const res = await fetch(`${API_BASE}/${id}`);
+            if (!res.ok) {
+                const body = await res.json().catch(() => null);
+                const msg = body && body.erro ? body.erro : "Erro ao buscar ticket.";
+                showMessage(msg, "erro");
+                return;
+            }
+            const ticket = await res.json();
+            preencherFormulario(ticket);
+            showMessage("Editando ticket #" + id, "ok");
+        } catch (e) {
+            showMessage("Erro de rede ao buscar ticket.", "erro");
+        }
+    }
+
+    async function excluirTicket(id) {
+        const confirma = window.confirm(`Deseja excluir o ticket #${id}?`);
+        if (!confirma) return;
+
+        try {
+            clearMessage();
+            const res = await fetch(`${API_BASE}/${id}`, {
+                method: "DELETE"
+            });
+            if (!res.ok && res.status !== 204) {
+                const body = await res.json().catch(() => null);
+                const msg = body && body.erro ? body.erro : "Erro ao excluir ticket.";
+                showMessage(msg, "erro");
+                return;
+            }
+            showMessage("Ticket excluído com sucesso.", "ok");
+            await carregarTickets();
+            limparFormulario();
+        } catch (e) {
+            showMessage("Erro de rede ao excluir ticket.", "erro");
+        }
+    }
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearMessage();
+
+        const payload = {
+            titulo: tituloField.value.trim(),
+            descricao: descField.value.trim(),
+            emailCliente: emailField.value.trim(),
+            prioridade: prioridadeField.value,
+            status: statusField.value
+        };
+
+        if (!payload.titulo || !payload.descricao || !payload.emailCliente ||
+            !payload.prioridade || !payload.status) {
+            showMessage("Preencha todos os campos obrigatórios (*).", "erro");
+            return;
+        }
+
+        const isEdicao = !!idField.value;
+        const url = isEdicao ? `${API_BASE}/${idField.value}` : API_BASE;
+        const method = isEdicao ? "PUT" : "POST";
+
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const body = await res.json().catch(() => null);
+                const msg = body && body.erro ? body.erro : "Erro ao salvar ticket.";
+                showMessage(msg, "erro");
+                return;
+            }
+
+            const ticket = await res.json().catch(() => null);
+            if (isEdicao) {
+                showMessage("Ticket atualizado com sucesso.", "ok");
+            } else {
+                showMessage("Ticket criado com sucesso. ID: " + (ticket && ticket.id ? ticket.id : ""), "ok");
+            }
+
+            limparFormulario();
+            await carregarTickets();
+        } catch (e) {
+            showMessage("Erro de rede ao salvar ticket.", "erro");
+        }
+    });
+
+    btnCancelar.addEventListener("click", () => {
+        limparFormulario();
+        clearMessage();
+    });
+
+    // carrega a lista assim que a página abre
+    carregarTickets();
+</script>
+</body>
+</html>

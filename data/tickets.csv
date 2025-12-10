@@ -1,0 +1,20 @@
+id;titulo;descricao;emailCliente;prioridade;status
+1;Ticket editado com sucessoTicket editado com sucessoTicket editado com sucessoTicket editado com sucessoTicket editado com sucessoTicket editado com sucesso;Descrição alterada;cliente2@example.com;ALTA;RESOLVIDO
+2;Ticket Selenium;Criado via Selenium;selenium@teste.com;ALTA;ABERTO
+3;Ticket Editado Selenium;Criado para edição;editar@teste.com;BAIXA;ABERTO
+4;Ticket Selenium;Criado via Selenium;selenium@teste.com;ALTA;ABERTO
+5;Ticket Editar;Criado para edição;editar@teste.com;BAIXA;ABERTO
+6;Bug no sistema;Erro ao abrir tela X;cliente@example.com;ALTA;ABERTO
+7;Ticket para editar;Descrição original;cliente2@example.com;MEDIA;ABERTO
+8;Bug no sistema;Erro ao abrir tela X;cliente@example.com;ALTA;ABERTO
+9;Bug no sistema;Erro ao abrir tela X;cliente@example.com;ALTA;ABERTO
+10;Bug no sistema;Erro ao abrir tela X;cliente@example.com;ALTA;ABERTO
+11;Bug no sistema;Erro ao abrir tela X;cliente@example.com;ALTA;ABERTO
+12;Bug no sistema;Erro ao abrir tela X;cliente@example.com;ALTA;ABERTO
+13;Bug no sistema;Erro ao abrir tela X;cliente@example.com;ALTA;ABERTO
+14;Bug no sistema;Erro ao abrir tela X;cliente@example.com;ALTA;ABERTO
+15;Teste;testaaai;test@testeee.com.br;CRITICA;ABERTO
+16;hjteste;rsrs;testy@gmail.com;CRITICA;EM_ANDAMENTO
+17;Bug no sistema;Erro ao abrir tela X;cliente@example.com;ALTA;ABERTO
+18;Bug no sistema;Erro ao abrir tela X;cliente@example.com;ALTA;ABERTO
+19;Bug no sistema;Erro ao abrir tela X;cliente@example.com;ALTA;ABERTO

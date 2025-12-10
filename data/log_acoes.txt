@@ -1,0 +1,50 @@
+2025-11-09T23:38:38.111776500 - COMPRA|cliente=Ricardo Richard|livro=A moreninha|qtd=1|antes=5|depois=4
+2025-11-10T11:53:17.801260900 - ATUALIZACAO|acao=MERGE|id=4|livro=A moreninha|autor=Joaquim Manuel de Macedo|antes=4|adicionado=4|depois=8|preco=49,90
+2025-11-10T11:53:47.719439900 - CRIACAO_CLIENTE|id=4|nome=John Doe|email=djdoe@gmail.com
+2025-11-10T11:54:07.574376 - COMPRA|cliente=John Doe|livro=A moreninha|qtd=1|antes=8|depois=7
+2025-11-10T11:57:06.985290900 - CRIACAO|id=5|livro=|autor=|qtd=1|preco=49,90
+2025-11-10T20:55:09.504055400 - CRIACAO_CLIENTE|id=3|nome=Novo Cliente|email=novo@email
+2025-11-10T20:55:09.529671900 - COMPRA|cliente=Fulano da Silva|livro=1984|qtd=1|antes=2|depois=1
+2025-11-10T21:55:29.358518100 - CRIACAO_CLIENTE|id=3|nome=Ricardo Richard|email=ricrich@gmail.com
+2025-11-10T21:55:32.340659700 - BLOQUEADA|acao=CRIACAO_CLIENTE|motivo=DUPLICADO|nome=Ricardo Richard|email=ricrich@gmail.com
+2025-11-24T00:55:03.273255400 - CRIACAO_CLIENTE|id=3|nome=Novo Cliente|email=novo@email
+2025-11-24T00:55:03.300018400 - COMPRA|cliente=Fulano da Silva|livro=1984|qtd=1|antes=2|depois=1
+2025-11-24T00:55:07.872065700 - CRIACAO|id=4|livro=Livro Teste 1|autor=Autor A|qtd=3|preco=19,00
+2025-11-24T00:55:08.760653 - CRIACAO|id=4|livro=Livro Teste 2|autor=Autor B|qtd=0|preco=0,00
+2025-11-24T00:55:09.124724400 - CRIACAO|id=4|livro=Com Espaços|autor=Autor C|qtd=1|preco=5,00
+2025-11-24T00:56:58.679658500 - CRIACAO_CLIENTE|id=3|nome=Novo Cliente|email=novo@email
+2025-11-24T00:56:58.707004900 - COMPRA|cliente=Fulano da Silva|livro=1984|qtd=1|antes=2|depois=1
+2025-11-24T00:57:01.727632500 - CRIACAO|id=4|livro=Livro Teste 1|autor=Autor A|qtd=3|preco=19,00
+2025-11-24T00:57:02.056652300 - CRIACAO|id=4|livro=Livro Teste 2|autor=Autor B|qtd=0|preco=0,00
+2025-11-24T00:57:02.392303600 - CRIACAO|id=4|livro=Com Espaços|autor=Autor C|qtd=1|preco=5,00
+2025-11-24T00:59:53.806512400 - CRIACAO|id=4|livro=Livro Teste 1|autor=Autor A|qtd=3|preco=19,00
+2025-11-24T00:59:54.162134600 - CRIACAO|id=4|livro=Livro Teste 2|autor=Autor B|qtd=0|preco=0,00
+2025-11-24T00:59:54.506041700 - CRIACAO|id=4|livro=Com Espaços|autor=Autor C|qtd=1|preco=5,00
+2025-11-24T01:01:13.623376600 - CRIACAO_CLIENTE|id=3|nome=Novo Cliente|email=novo@email
+2025-11-24T01:01:13.647925100 - COMPRA|cliente=Fulano da Silva|livro=1984|qtd=1|antes=2|depois=1
+2025-11-24T01:01:16.726521200 - CRIACAO|id=4|livro=Livro Teste 1|autor=Autor A|qtd=3|preco=19,00
+2025-11-24T01:01:17.106329400 - CRIACAO|id=4|livro=Livro Teste 2|autor=Autor B|qtd=0|preco=0,00
+2025-11-24T01:01:17.473489500 - CRIACAO|id=4|livro=Com Espaços|autor=Autor C|qtd=1|preco=5,00
+2025-12-09T11:50:56.632279500 - CRIACAO_CLIENTE|id=3|nome=Novo Cliente|email=novo@email
+2025-12-09T11:50:56.656053 - COMPRA|cliente=Fulano da Silva|livro=1984|qtd=1|antes=2|depois=1
+2025-12-09T14:27:50.790077500 - CRIACAO_CLIENTE|id=3|nome=Novo Cliente|email=novo@email
+2025-12-09T14:27:50.811913400 - COMPRA|cliente=Fulano da Silva|livro=1984|qtd=1|antes=2|depois=1
+2025-12-09T14:29:18.492414600 - CRIACAO_CLIENTE|id=3|nome=Novo Cliente|email=novo@email
+2025-12-09T14:29:18.511534400 - COMPRA|cliente=Fulano da Silva|livro=1984|qtd=1|antes=2|depois=1
+2025-12-09T19:57:33.297863100 - CRIACAO_CLIENTE|id=3|nome=Novo Cliente|email=novo@email
+2025-12-09T19:57:33.305919600 - COMPRA|cliente=Fulano da Silva|livro=1984|qtd=1|antes=2|depois=1
+2025-12-09T20:31:01.274353 - CRIACAO_CLIENTE|id=3|nome=Novo Cliente|email=novo@email
+2025-12-09T20:31:01.283954700 - COMPRA|cliente=Fulano da Silva|livro=1984|qtd=1|antes=2|depois=1
+2025-12-09T20:31:07.920870 - CRIACAO|id=4|livro=Livro Teste 1|autor=Autor A|qtd=3|preco=19,00
+2025-12-09T20:31:08.786565300 - CRIACAO|id=4|livro=Livro Teste 2|autor=Autor B|qtd=0|preco=0,00
+2025-12-09T20:31:09.146103800 - CRIACAO|id=4|livro=Com Espaços|autor=Autor C|qtd=1|preco=5,00
+2025-12-09T20:36:39.812456100 - CRIACAO_CLIENTE|id=3|nome=Novo Cliente|email=novo@email
+2025-12-09T20:36:39.819643200 - COMPRA|cliente=Fulano da Silva|livro=1984|qtd=1|antes=2|depois=1
+2025-12-09T20:36:43.012456100 - CRIACAO|id=4|livro=Livro Teste 1|autor=Autor A|qtd=3|preco=19,00
+2025-12-09T20:36:43.335459100 - CRIACAO|id=4|livro=Livro Teste 2|autor=Autor B|qtd=0|preco=0,00
+2025-12-09T20:36:43.650040600 - CRIACAO|id=4|livro=Com Espaços|autor=Autor C|qtd=1|preco=5,00
+2025-12-09T20:48:40.845007900 - CRIACAO_CLIENTE|id=3|nome=Novo Cliente|email=novo@email
+2025-12-09T20:48:40.871115100 - COMPRA|cliente=Fulano da Silva|livro=1984|qtd=1|antes=2|depois=1
+2025-12-09T20:48:52.765220500 - CRIACAO|id=4|livro=Livro Teste 1|autor=Autor A|qtd=3|preco=19,00
+2025-12-09T20:48:53.116631300 - CRIACAO|id=4|livro=Livro Teste 2|autor=Autor B|qtd=0|preco=0,00
+2025-12-09T20:48:53.469560 - CRIACAO|id=4|livro=Com Espaços|autor=Autor C|qtd=1|preco=5,00

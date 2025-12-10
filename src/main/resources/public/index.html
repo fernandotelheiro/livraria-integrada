@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8"/>
+    <title>Livraria - CRUD + Compras + Relatório</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <style>
+        :root { --b:#222; --g:#f5f5f7; --l:#e9e9ee; --a:#2563eb; --ok:#16a34a; --bad:#dc2626 }
+        * { box-sizing: border-box }
+        body { margin:0; font-family: system-ui, Arial, sans-serif; background: var(--g); color:#111 }
+        header { background:#fff; border-bottom:1px solid var(--l); position:sticky; top:0; z-index:10 }
+        nav { display:flex; gap:8px; padding:12px 16px; flex-wrap:wrap }
+        nav button{ padding:8px 12px; border:1px solid var(--l); background:#fff; border-radius:8px; cursor:pointer }
+        nav button.active{ background:var(--a); color:#fff; border-color:var(--a) }
+        main { padding:16px; max-width:1100px; margin:0 auto }
+        section { display:none; background:#fff; border:1px solid var(--l); border-radius:12px; padding:16px }
+        section.show { display:block }
+        h2 { margin:0 0 12px 0 }
+        .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end }
+        .card { border:1px solid var(--l); border-radius:10px; padding:12px; background:#fff }
+        label { display:block; font-size:12px; color:#444; margin-bottom:4px }
+        input, select { padding:8px; border:1px solid var(--l); border-radius:8px; min-width:220px }
+        input[type=number]{ width:120px }
+        button.primary{ background:var(--a); color:#fff; border:1px solid var(--a); padding:8px 12px; border-radius:8px; cursor:pointer }
+        button.ghost{ background:#fff; border:1px solid var(--l); padding:8px 12px; border-radius:8px; cursor:pointer }
+        table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:14px }
+        th,td{ border:1px solid var(--l); padding:8px; vertical-align:top }
+        th{ background:#fafafa; text-align:left }
+        .muted{ color:#666; font-size:12px }
+        .toast{ position:fixed; right:16px; bottom:16px; background:#111; color:#fff; padding:10px 14px; border-radius:8px; opacity:.95 }
+        .ok{ background: var(--ok) }
+        .bad{ background: var(--bad) }
+        .sp{ flex:1 1 auto }
+
+        /* destaque de campo inválido */
+        .invalid{
+            border-color: var(--bad) !important;
+            box-shadow: 0 0 0 2px rgba(220,38,38,.15);
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav id="tabs"></nav>
+</header>
+<main>
+    <!-- LIVROS -->
+    <section id="tab-livros">
+        <h2>Livros</h2>
+
+        <div class="row">
+            <div class="card">
+                <h3 style="margin:0 0 8px 0">Criar</h3>
+                <label>Título <input id="l-nome" placeholder="Ex.: 1984" required></label>
+                <label>Autor <input id="l-autor" placeholder="Ex.: George Orwell" required></label>
+                <label>Quantidade <input id="l-qtd" type="number" min="0" value="1"></label>
+                <label>Preço <input id="l-preco" type="text" inputmode="decimal" value="49,90"></label>
+                <div style="margin-top:8px">
+                    <button class="primary" onclick="criarLivro()">Criar livro</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin:0 0 8px 0">Atualizar / Excluir</h3>
+                <div class="muted">Clique numa linha da tabela para preencher o formulário abaixo.</div>
+                <label>ID <input id="l-id" type="number" min="1" readonly></label>
+                <label>Título <input id="l-titulo-edit" required></label>
+                <label>Autor <input id="l-autor-edit" required></label>
+                <label>Quantidade <input id="l-qtd-edit" type="number" min="0"></label>
+                <label>Preço <input id="l-preco-edit" type="text" inputmode="decimal"></label>
+                <div style="margin-top:8px">
+                    <button class="primary" onclick="atualizarLivro()">Salvar alteração</button>
+                    <button class="ghost" onclick="excluirLivro()">Excluir</button>
+                </div>
+            </div>
+
+            <div class="sp"></div>
+        </div>
+
+        <table id="tbl-livros">
+            <thead><tr>
+                <th>ID</th><th>Título</th><th>Autor</th><th>Qtd</th><th>Preço</th>
+            </tr></thead>
+            <tbody></tbody>
+        </table>
+    </section>
+
+    <!-- CLIENTES -->
+    <section id="tab-clientes">
+        <h2>Clientes</h2>
+
+        <div class="row">
+            <div class="card">
+                <h3 style="margin:0 0 8px 0">Criar</h3>
+                <label>Nome <input id="c-nome" placeholder="Ex.: Fulano da Silva"></label>
+                <label>Email <input id="c-email" placeholder="fulano@exemplo.com"></label>
+                <div style="margin-top:8px">
+                    <button class="primary" onclick="criarCliente()">Criar cliente</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin:0 0 8px 0">Atualizar / Excluir</h3>
+                <div class="muted">Clique numa linha da tabela para preencher o formulário abaixo.</div>
+                <label>ID <input id="c-id" type="number" min="1" readonly></label>
+                <label>Nome <input id="c-nome-edit"></label>
+                <label>Email <input id="c-email-edit"></label>
+                <div style="margin-top:8px">
+                    <button class="primary" onclick="atualizarCliente()">Salvar alteração</button>
+                    <button class="ghost" onclick="excluirCliente()">Excluir</button>
+                </div>
+            </div>
+
+        </div>
+
+        <table id="tbl-clientes">
+            <thead><tr>
+                <th>ID</th><th>Nome</th><th>Email</th>
+            </tr></thead>
+            <tbody></tbody>
+        </table>
+    </section>
+
+    <!-- COMPRAS -->
+    <section id="tab-compras">
+        <h2>Compra</h2>
+        <div class="row">
+            <div class="card">
+                <h3 style="margin:0 0 8px 0">Registrar compra</h3>
+                <label>Título do livro <input id="p-titulo" placeholder="Digite o título exato"></label>
+                <label>Cliente (nome) <input id="p-cliente" placeholder="Fulano da Silva"></label>
+                <label>Quantidade <input id="p-qtd" type="number" min="1" value="1"></label>
+                <div style="margin-top:8px">
+                    <button class="primary" onclick="comprar()">Comprar</button>
+                </div>
+                <div class="muted" style="margin-top:6px">
+                    Dica: clique em um livro na aba "Livros" para copiar o título.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RELATÓRIO -->
+    <section id="tab-relatorio">
+        <h2>Relatório (log de ações)</h2>
+
+        <div class="row">
+            <div class="card">
+                <div class="row">
+                    <label>De <input type="date" id="r-de"></label>
+                    <label>Até <input type="date" id="r-ate"></label>
+                    <label>Tipo
+                        <select id="r-tipo">
+                            <option value="">(todos)</option>
+                            <option>COMPRA</option>
+                            <option>CRIACAO</option>
+                            <option>ATUALIZACAO</option>
+                            <option>EXCLUSAO</option>
+                            <option>BLOQUEADA</option>
+                        </select>
+                    </label>
+                    <label>Cliente <input id="r-cliente" placeholder="nome"></label>
+                    <label>Livro <input id="r-livro" placeholder="título"></label>
+                    <label>Página <input id="r-page" type="number" min="1" value="1" style="width:100px"></label>
+                    <label>Tamanho <input id="r-size" type="number" min="1" value="50" style="width:100px"></label>
+                    <button class="primary" onclick="carregarRelatorio()">Buscar</button>
+                </div>
+                <div id="r-meta" class="muted" style="margin-top:8px"></div>
+            </div>
+        </div>
+
+        <table id="tbl-rel">
+            <thead><tr>
+                <th>Data/Hora</th><th>Tipo</th><th>Cliente</th><th>Livro</th><th>Qtd</th><th>Estoque</th><th>Mensagem</th>
+            </tr></thead>
+            <tbody></tbody>
+        </table>
+    </section>
+
+</main>
+
+<div id="toast" class="toast" style="display:none"></div>
+
+<script>
+    // -------- util -------
+    const $ = sel => document.querySelector(sel);
+    const toast = (msg, ok=true) => {
+        const t = $('#toast'); t.textContent = msg; t.className = 'toast ' + (ok?'ok':'bad');
+        t.style.display = 'block'; setTimeout(()=> t.style.display='none', 2300);
+    };
+    const markInvalid = (...els) => {
+        els.filter(Boolean).forEach(el => {
+            el.classList.add('invalid');
+            setTimeout(()=> el.classList.remove('invalid'), 1200);
+        });
+    };
+
+    // fetch com no-store e bust de cache nos GETs
+    const api = async (url, method='GET', data=null) => {
+        const opt = { method, headers: {}, cache: 'no-store' };
+
+        let finalUrl = url;
+        if (method === 'GET') {
+            finalUrl = url + (url.includes('?') ? '&' : '?') + '_ts=' + Date.now();
+        }
+        if (data != null) {
+            opt.headers['Content-Type'] = 'application/json';
+            opt.body = JSON.stringify(data);
+        }
+
+        const res = await fetch(finalUrl, opt);
+        if (!res.ok) {
+            // tenta extrair JSON {error:"..."} para mensagem mais clara
+            let msg = res.statusText;
+            try { const j = await res.json(); msg = j.error || JSON.stringify(j); }
+            catch { try { msg = await res.text(); } catch {} }
+            throw new Error(`HTTP ${res.status} - ${msg}`);
+        }
+        const ct = res.headers.get('content-type') || '';
+        return ct.includes('application/json') ? res.json() : res.text();
+    };
+
+    // ------ tabs ----------
+    const tabs = [
+        { id: 'livros', label: 'Livros' },
+        { id: 'clientes', label: 'Clientes' },
+        { id: 'compras', label: 'Compras' },
+        { id: 'relatorio', label: 'Relatório' },
+    ];
+    const nav = $('#tabs');
+    tabs.forEach((t,i)=>{
+        const b = document.createElement('button');
+        b.textContent = t.label;
+        b.onclick = () => showTab(t.id);
+        if (i===0) b.classList.add('active');
+        nav.appendChild(b);
+    });
+
+    // ---- botão/link para o sistema de suporte ----
+    const btnSuporte = document.createElement('button');
+    btnSuporte.textContent = 'Suporte';
+    btnSuporte.onclick = () => {
+        window.location.href = '/support-index.html';
+    };
+    // joga o botão de suporte para a direita no flex
+    btnSuporte.style.marginLeft = 'auto';
+    nav.appendChild(btnSuporte);
+    // ----------------------------------------------
+
+    const showTab = (id) => {
+        document.querySelectorAll('section').forEach(s => s.classList.remove('show'));
+        document.querySelectorAll('#tabs button').forEach(b => b.classList.remove('active'));
+        document.querySelector(`#tab-${id}`).classList.add('show');
+        const idx = tabs.findIndex(t=>t.id===id);
+        nav.children[idx].classList.add('active');
+        if (id==='livros') carregarLivros();
+        if (id==='clientes') carregarClientes();
+        if (id==='relatorio') carregarRelatorio();
+    };
+    showTab('livros');
+
+    // ------- LIVROS ---------
+    async function carregarLivros(){
+        try{
+            const lista = await api('/api/livros');
+            const tbody = $('#tbl-livros tbody'); tbody.innerHTML='';
+            for(const l of lista){
+                const tr = document.createElement('tr');
+                const precoNum = Number(l.preco ?? 0);
+                tr.innerHTML = `<td>${l.id}</td><td class="t">${l.titulo||''}</td><td>${l.autor||''}</td><td>${l.quantidade}</td><td>${precoNum.toFixed(2)}</td>`;
+                tr.onclick = ()=>{
+                    $('#l-id').value = l.id;
+                    $('#l-titulo-edit').value = l.titulo||'';
+                    $('#l-autor-edit').value = l.autor||'';
+                    $('#l-qtd-edit').value = l.quantidade ?? 0;
+                    $('#l-preco-edit').value = precoNum.toFixed(2).replace('.', ',');
+                    $('#p-titulo').value = l.titulo||'';
+                };
+                tbody.appendChild(tr);
+            }
+        }catch(e){ toast(e.message,false); }
+    }
+
+    // normaliza "49,90" -> "49.90"
+    const normPreco = (s) => (s||'').toString().trim().replace(',', '.');
+
+    async function criarLivro(){
+        try{
+            const tituloEl = $('#l-nome');
+            const autorEl  = $('#l-autor');
+            const titulo = tituloEl.value.trim();
+            const autor  = autorEl.value.trim();
+
+            if(!titulo || !autor){
+                toast('Preencha Título e Autor', false);
+                if(!titulo) markInvalid(tituloEl);
+                if(!autor)  markInvalid(autorEl);
+                return;
+            }
+
+            const data = {
+                titulo,
+                autor,
+                quantidade: parseInt($('#l-qtd').value||'0',10),
+                preco: normPreco($('#l-preco').value)
+            };
+            await api('/api/livros','POST', data);
+            toast('Livro criado');
+            tituloEl.value=''; autorEl.value=''; $('#l-qtd').value=1; $('#l-preco').value='49,90';
+            await carregarLivros();
+        }catch(e){ toast(e.message,false); }
+    }
+
+    async function atualizarLivro(){
+        try{
+            const id = parseInt($('#l-id').value||'0',10);
+            if (!id) return toast('Selecione um livro na tabela', false);
+
+            const tituloEl = $('#l-titulo-edit');
+            const autorEl  = $('#l-autor-edit');
+            const titulo = tituloEl.value.trim();
+            const autor  = autorEl.value.trim();
+
+            if(!titulo || !autor){
+                toast('Preencha Título e Autor', false);
+                if(!titulo) markInvalid(tituloEl);
+                if(!autor)  markInvalid(autorEl);
+                return;
+            }
+
+            const data = {
+                titulo,
+                autor,
+                quantidade: parseInt($('#l-qtd-edit').value||'0',10),
+                preco: normPreco($('#l-preco-edit').value)
+            };
+            await api(`/api/livros/${id}`,'PUT', data);
+            toast('Livro atualizado');
+            await carregarLivros();
+        }catch(e){ toast(e.message,false); }
+    }
+
+    async function excluirLivro(){
+        try{
+            const id = parseInt($('#l-id').value||'0',10);
+            if (!id) return toast('Selecione um livro na tabela', false);
+            await api(`/api/livros/${id}`,'DELETE');
+            toast('Livro excluído (se estoque > 0; se =0, regra mantém o item)');
+            await carregarLivros();
+        }catch(e){ toast(e.message,false); }
+    }
+
+    // ------- CLIENTES ----------------
+    async function carregarClientes(){
+        try{
+            const lista = await api('/api/clientes');
+            const tbody = $('#tbl-clientes tbody'); tbody.innerHTML='';
+            for(const c of lista){
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${c.id}</td><td>${c.nome||''}</td><td>${c.email||''}</td>`;
+                tr.onclick = ()=>{
+                    $('#c-id').value = c.id;
+                    $('#c-nome-edit').value = c.nome||'';
+                    $('#c-email-edit').value = c.email||'';
+                    $('#p-cliente').value = c.nome||'';
+                };
+                tbody.appendChild(tr);
+            }
+        }catch(e){ toast(e.message,false); }
+    }
+    async function criarCliente(){
+        try{
+            const data = { nome: $('#c-nome').value.trim(), email: $('#c-email').value.trim() };
+            await api('/api/clientes','POST', data);
+            toast('Cliente criado');
+            $('#c-nome').value=''; $('#c-email').value='';
+            await carregarClientes();
+        }catch(e){ toast(e.message,false); }
+    }
+    async function atualizarCliente(){
+        try{
+            const id = parseInt($('#c-id').value||'0',10);
+            if (!id) return toast('Selecione um cliente na tabela', false);
+            const data = { nome: $('#c-nome-edit').value.trim(), email: $('#c-email-edit').value.trim() };
+            await api(`/api/clientes/${id}`,'PUT', data);
+            toast('Cliente atualizado');
+            await carregarClientes();
+        }catch(e){ toast(e.message,false); }
+    }
+    async function excluirCliente(){
+        try{
+            const id = parseInt($('#c-id').value||'0',10);
+            if (!id) return toast('Selecione um cliente na tabela', false);
+            await api(`/api/clientes/${id}`,'DELETE');
+            toast('Cliente excluído');
+            await carregarClientes();
+        }catch(e){ toast(e.message,false); }
+    }
+
+    // ------ COMPRAS -------------
+    async function comprar(){
+        try{
+            const titulo = $('#p-titulo').value.trim();
+            const cliente = $('#p-cliente').value.trim();
+            const quantidade = parseInt($('#p-qtd').value||'0',10);
+            if(!titulo || !cliente || !quantidade) return toast('Preencha título, cliente e quantidade', false);
+            await api('/api/compras','POST', { titulo, cliente, quantidade });
+            toast('Compra registrada');
+            await carregarLivros(); // estoque atualizado
+        }catch(e){ toast(e.message,false); }
+    }
+
+    // ------- RELATÓRIO -------------
+    async function carregarRelatorio(){
+        try{
+            const params = new URLSearchParams();
+            const de=$('#r-de').value, ate=$('#r-ate').value, tipo=$('#r-tipo').value;
+            const cliente=$('#r-cliente').value.trim(), livro=$('#r-livro').value.trim();
+            const page=$('#r-page').value||'1', size=$('#r-size').value||'50';
+            if(de) params.set('de',de);
+            if(ate) params.set('ate',ate);
+            if(tipo) params.set('tipo',tipo);
+            if(cliente) params.set('cliente',cliente);
+            if(livro) params.set('livro',livro);
+            params.set('page',page);
+            params.set('size',size);
+
+            const url = '/api/relatorio' + (params.toString()?`?${params.toString()}`:'');
+            const json = await api(url);
+
+            $('#r-meta').textContent =
+                `Linhas: ${json.totais.linhas} • Itens vendidos: ${json.totais.itensVendidos} • Página ${json.paginacao.page} (size=${json.paginacao.size}) • hasNext=${json.paginacao.hasNext}`;
+
+            const tbody = $('#tbl-rel tbody'); tbody.innerHTML='';
+            for(const e of json.dados){
+                const tr = document.createElement('tr');
+                const estoque = (e.estoqueAntes!=null && e.estoqueDepois!=null) ? `${e.estoqueAntes} → ${e.estoqueDepois}` : '';
+                tr.innerHTML = `
+          <td>${e.timestamp ?? ''}</td>
+          <td>${e.tipo ?? ''}</td>
+          <td>${e.cliente ?? ''}</td>
+          <td>${e.livro ?? ''}</td>
+          <td>${e.quantidade ?? ''}</td>
+          <td>${estoque}</td>
+          <td>${e.mensagem ?? ''}</td>
+        `;
+                tbody.appendChild(tr);
+            }
+        }catch(e){ toast(e.message,false); }
+    }
+
+
+    carregarLivros();
+    carregarClientes();
+</script>
+</body>
+</html>
