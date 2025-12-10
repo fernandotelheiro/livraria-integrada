@@ -1,0 +1,80 @@
+name: CD - Deploy livraria-integrada
+
+on:
+  # Deploy de desenvolvimento em todo push na main
+  push:
+    branches: [ main ]
+
+  # Deploy de produção quando uma release é publicada
+  release:
+    types: [ published ]
+
+  # Permite rodar manualmente pela interface do GitHub
+  workflow_dispatch:
+
+jobs:
+  package:
+    name: Build para deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Dar permissão de execução ao gradlew
+        run: chmod +x gradlew
+
+      # Aqui só empacota (pode rodar testes no CI separado, no ci.yml)
+      - name: Build (empacotar JAR)
+        run: ./gradlew clean build -x test
+
+      - name: Publicar artefato para deploy
+        uses: actions/upload-artifact@v4
+        with:
+          name: livraria-jar
+          path: build/libs/*.jar
+
+  deploy-dev:
+    name: Deploy em ambiente DEV
+    needs: package
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Baixar artefato gerado no job package
+        uses: actions/download-artifact@v4
+        with:
+          name: livraria-jar
+          path: deploy/dev
+
+      - name: Simular deploy em DEV
+        run: |
+          echo "Realizando deploy no ambiente DEV..."
+          ls -R deploy/dev
+
+  deploy-prod:
+    name: Deploy em ambiente PROD
+    needs: deploy-dev
+    # Só roda para releases publicadas (evita deploy de prod a cada push)
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Baixar artefato gerado no job package
+        uses: actions/download-artifact@v4
+        with:
+          name: livraria-jar
+          path: deploy/prod
+
+      - name: Simular deploy em PROD
+        run: |
+          echo "Deploy em PRODUÇÃO disparado pela release ${{ github.event.release.tag_name }} ..."
+          ls -R deploy/prod
